@@ -165,6 +165,9 @@ spec:
             - name: mediaserver-volume
               mountPath: "/downloads"
               subPath: "{{ .Values.general.storage.subPaths.downloads }}"
+          {{- if .Values.transmission.extraVolumes }}
+            {{- toYaml .Values.transmission.extraVolumeMounts | nindent 12}}
+          {{- end }}
           {{- with .Values.transmission.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -187,6 +190,9 @@ spec:
           configMap:
             defaultMode: 493
             name: init-transmission-cm
+        {{- if .Values.transmission.extraVolumes }}
+          {{- toYaml .Values.transmission.extraVolumes | nindent 8}}
+        {{- end }}
       {{- with .Values.general.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -255,6 +261,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: transmission-lb
+  annotations:
+    {{- include .Values.transmission.service.extraLBService.annotations . | nindent 4 }}
   labels:
     {{- include "k8s-mediaserver.labels" . | nindent 4 }}
 spec:
