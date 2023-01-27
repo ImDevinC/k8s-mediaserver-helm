@@ -42,6 +42,10 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.plex.volume.name }}
         {{- end }}
+        {{- if .Values.plex.extraVolumes }}
+          {{- toYaml .Values.plex.extraVolumes | nindent 8}}
+        {{- end }}
+      hostNetwork: {{ .Values.plex.hostNetwork }}
       containers:
         - name: {{ .Chart.Name }}
           envFrom:
@@ -73,6 +77,9 @@ spec:
             - name: mediaserver-volume
               mountPath: /tv
               subPath: "{{ .Values.general.storage.subPaths.tv }}"
+          {{- if .Values.plex.extraVolumeMounts }}
+            {{- toYaml .Values.plex.extraVolumeMounts | nindent 12}}
+          {{- end }}
           {{- with .Values.plex.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -108,6 +115,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: plex-lb
+  annotations:
+    {{- include .Values.plex.service.extraLBService.annotations . | nindent 4 }}
   labels:
     {{- include "k8s-mediaserver.labels" . | nindent 4 }}
 spec:

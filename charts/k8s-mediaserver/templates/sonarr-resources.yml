@@ -1,30 +1,29 @@
-{{ if .Values.radarr.enabled }}
+{{ if .Values.sonarr.enabled }}
 ---
 ### CONFIGMAP
 ## INIT-CONTAINER
----
 apiVersion: v1
 data:
   config.xml: |
     <Config>
-      <UrlBase>{{ .Values.radarr.ingress.path }}</UrlBase>
+      <UrlBase>{{ .Values.sonarr.ingress.path }}</UrlBase>
     </Config>
-  init-radarr.sh: |
+  init-sonarr.sh: |
     #!/bin/bash
     echo "### Initializing config ###"
-    if [ ! -f /radarr-config/config.xml ]; then
-      cp -n /init-radarr/config.xml /radarr-config/config.xml
+    if [ ! -f /sonarr-config/config.xml ]; then
+      cp -n /init-sonarr/config.xml /sonarr-config/config.xml
       echo "### No configuration found, intialized with default settings ###"
     fi
 kind: ConfigMap
 metadata:
-  name: init-radarr-cm
+  name: init-sonarr-cm
 ---
 ## APPLICATION
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: radarr-config
+  name: sonarr-config
 data:
   PGID: "{{ .Values.general.pgid }}"
   PUID: "{{ .Values.general.puid }}"
@@ -33,7 +32,7 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: radarr
+  name: sonarr
   labels:
     {{- include "k8s-mediaserver.labels" . | nindent 4 }}
 spec:
@@ -47,22 +46,22 @@ spec:
     metadata:
       labels:
         {{- include "k8s-mediaserver.selectorLabels" . | nindent 8 }}
-        app: radarr
+        app: sonarr
     spec:
       initContainers:
-        - name: config-radarr
+        - name: config-sonarr
           image: docker.io/ubuntu:groovy
-          command: ["/init-radarr/init-radarr.sh"]
+          command: ["/init-sonarr/init-sonarr.sh"]
           volumeMounts:
-            - mountPath: /init-radarr
-              name: init-files-radarr
-          {{- if .Values.radarr.volume }}
-            - name: {{ .Values.radarr.volume.name }}
-              mountPath: /radarr-config
+            - mountPath: /init-sonarr
+              name: init-files-sonarr
+          {{- if .Values.sonarr.volume }}
+            - name: {{ .Values.sonarr.volume.name }}
+              mountPath: /sonarr-config
           {{- else }}
             - name: mediaserver-volume
-              mountPath: /radarr-config
-              subPath: "{{ .Values.general.storage.subPaths.config }}/radarr"
+              mountPath: /sonarr-config
+              subPath: "{{ .Values.general.storage.subPaths.config }}/sonarr"
           {{- end }}
           securityContext:
             runAsUser: {{ .Values.general.puid }}
@@ -71,34 +70,37 @@ spec:
         - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
-                name: radarr-config
-          image: "{{ .Values.radarr.container.image }}:{{ .Values.radarr.container.tag | default .Values.general.image_tag }}"
+                name: sonarr-config
+          image: "{{ .Values.sonarr.container.image }}:{{ .Values.sonarr.container.tag | default .Values.general.image_tag }}"
           imagePullPolicy: Always
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.radarr.container.port }}
+              port: {{ .Values.sonarr.container.port }}
             initialDelaySeconds: 10
             periodSeconds: 20
           ports:
-            - name: radarr-port
-              containerPort: {{ .Values.radarr.container.port }}
+            - name: sonarr-port
+              containerPort: {{ .Values.sonarr.container.port }}
               protocol: TCP
           volumeMounts:
-          {{- if .Values.radarr.volume }}
-            - name: {{ .Values.radarr.volume.name }}
+          {{- if .Values.sonarr.volume }}
+            - name: {{ .Values.sonarr.volume.name }}
               mountPath: /config
           {{- else }}
             - name: mediaserver-volume
               mountPath: "/config"
-              subPath: "{{ .Values.general.storage.subPaths.config }}/radarr"
+              subPath: "{{ .Values.general.storage.subPaths.config }}/sonarr"
           {{- end }}
             - name: mediaserver-volume
               mountPath: "/downloads"
               subPath: "{{ .Values.general.storage.subPaths.downloads }}"
             - name: mediaserver-volume
-              mountPath: "/movies"
-              subPath: "{{ .Values.general.storage.subPaths.movies }}"
-          {{- with .Values.radarr.resources }}
+              mountPath: "/tv"
+              subPath: "{{ .Values.general.storage.subPaths.tv }}"
+          {{- if .Values.sonarr.extraVolumeMounts }}
+            {{- toYaml .Values.sonarr.extraVolumeMounts | nindent 12}}
+          {{- end }}
+          {{- with .Values.sonarr.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -111,15 +113,18 @@ spec:
         - name: mediaserver-volume
           {{- toYaml .Values.general.storage.volumes | nindent 10 }}
         {{- end }}
-        {{- if .Values.radarr.volume }}
-        - name: {{ .Values.radarr.volume.name }}
+        {{- if .Values.sonarr.volume }}
+        - name: {{ .Values.sonarr.volume.name }}
           persistentVolumeClaim:
-            claimName: {{ .Values.radarr.volume.name }}
+            claimName: {{ .Values.sonarr.volume.name }}
         {{- end }}
-        - name: init-files-radarr
+        - name: init-files-sonarr
           configMap:
             defaultMode: 493
-            name: init-radarr-cm
+            name: init-sonarr-cm
+        {{- if .Values.sonarr.extraVolumes }}
+          {{- toYaml .Values.sonarr.extraVolumes | nindent 8}}
+        {{- end }}
       {{- with .Values.general.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -129,71 +134,72 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: radarr
+  name: sonarr
   labels:
     {{- include "k8s-mediaserver.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.radarr.service.type }}
+  type: {{ .Values.sonarr.service.type }}
   ports:
-    - port: {{ .Values.radarr.service.port }}
-      targetPort: {{ .Values.radarr.container.port }}
+    - port: {{ .Values.sonarr.service.port }}
+      targetPort: {{ .Values.sonarr.container.port }}
       protocol: TCP
-{{ if eq .Values.radarr.service.type "NodePort" }}
-      nodePort: {{ .Values.radarr.service.nodePort }}
+{{ if eq .Values.sonarr.service.type "NodePort" }}
+      nodePort: {{ .Values.sonarr.service.nodePort }}
 {{ end }}
-      name: radarr-port
+      name: sonarr-port
   selector:
-    app: radarr
-
+    app: sonarr
 ---
-{{ if .Values.radarr.service.extraLBService }}
+{{ if .Values.sonarr.service.extraLBService }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: radarr-lb
+  name: sonarr-lb
+  annotations:
+    {{- include .Values.sonarr.service.extraLBService.annotations . | nindent 4 }}
   labels:
     {{- include "k8s-mediaserver.labels" . | nindent 4 }}
 spec:
   type: LoadBalancer
   ports:
-    - port: {{ .Values.radarr.service.port }}
-      targetPort: {{ .Values.radarr.container.port }}
+    - port: {{ .Values.sonarr.service.port }}
+      targetPort: {{ .Values.sonarr.container.port }}
       protocol: TCP
-      name: radarr-port
+      name: sonarr-port
   selector:
-    app: radarr
+    app: sonarr
 {{ end }}
 ---
-### INGRESS ###
-{{ if .Values.radarr.ingress.enabled }}
+### INGRESS
+{{ if .Values.sonarr.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: radarr
+  name: sonarr
   labels:
     {{- include "k8s-mediaserver.labels" . | nindent 4 }}
-  {{- with .Values.radarr.ingress.annotations }}
+  {{- with .Values.sonarr.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-{{- if .Values.radarr.ingress.tls.enabled }}
+{{- if .Values.sonarr.ingress.tls.enabled }}
   tls:
     - hosts:
         - {{ .Values.general.ingress_host | quote }}
-      secretName: {{ .Values.radarr.ingress.tls.secretName }}
+      secretName: {{ .Values.sonarr.ingress.tls.secretName }}
 {{ end }}
   ingressClassName: {{ .Values.general.ingress.ingressClassName }}
   rules:
     - host: {{ .Values.general.ingress_host | quote }}
       http:
         paths:
-          - path: {{ .Values.radarr.ingress.path }}
+          - path: {{ .Values.sonarr.ingress.path }}
             pathType: Prefix
             backend:
               service:
-                name: radarr
+                name: sonarr
                 port:
-                  number: {{ .Values.radarr.service.port }}
+                  number: {{ .Values.sonarr.service.port }}
 {{ end }}
 {{ end }}

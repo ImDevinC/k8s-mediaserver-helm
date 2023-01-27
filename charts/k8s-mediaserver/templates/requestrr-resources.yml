@@ -1,0 +1,299 @@
+{{ if .Values.requestrr.enabled }}
+---
+### CONFIGMAPS
+### INIT-CONTAINER
+apiVersion: v1
+data:
+  settings.json: |
+    {
+      "Authentication": {
+        "Username": "",
+        "Password": "",
+        "PrivateKey": "{{ uuidv4 }}"
+      },
+      "ChatClients": {
+        "Discord": {
+          "BotToken": "",
+          "ClientId": "",
+          "StatusMessage": "/help",
+          "TvShowRoles": [],
+          "MovieRoles": [],
+          "MonitoredChannels": [],
+          "EnableRequestsThroughDirectMessages": false,
+          "AutomaticallyNotifyRequesters": true,
+          "NotificationMode": "PrivateMessages",
+          "NotificationChannels": [],
+          "AutomaticallyPurgeCommandMessages": true
+        },
+        "Language": "english"
+      },
+      "DownloadClients": {
+        "Ombi": {
+          "Hostname": "",
+          "Port": 3579,
+          "ApiKey": "",
+          "ApiUsername": "",
+          "BaseUrl": "",
+          "UseSSL": false,
+          "Version": "3"
+        },
+        "Overseerr": {
+          "Hostname": "",
+          "Port": 5055,
+          "ApiKey": "",
+          "Movies": {
+            "DefaultApiUserID": "",
+            "Categories": []
+          },
+          "TvShows": {
+            "DefaultApiUserID": "",
+            "Categories": []
+          },
+          "UseSSL": false,
+          "Version": "1"
+        },
+        "Radarr": {
+          "Hostname": "",
+          "Port": 7878,
+          "ApiKey": "",
+          "BaseUrl": "",
+          "Categories": [
+            {
+              "Id": 0,
+              "Name": "movie",
+              "ProfileId": "1",
+              "RootFolder": "",
+              "MinimumAvailability": "announced",
+              "Tags": []
+            }
+          ],
+          "SearchNewRequests": true,
+          "MonitorNewRequests": true,
+          "UseSSL": false,
+          "Version": "3"
+        },
+        "Sonarr": {
+          "Hostname": "",
+          "Port": 8989,
+          "ApiKey": "",
+          "BaseUrl": "",
+          "Categories": [
+            {
+              "Id": 0,
+              "Name": "tv",
+              "ProfileId": "1",
+              "RootFolder": "",
+              "Tags": [],
+              "LanguageId": "1",
+              "UseSeasonFolders": true,
+              "SeriesType": "standard"
+            }
+          ],
+          "SearchNewRequests": true,
+          "MonitorNewRequests": true,
+          "UseSSL": false,
+          "Version": "3"
+        }
+      },
+      "BotClient": {
+        "Client": ""
+      },
+      "Movies": {
+        "Client": "Disabled"
+      },
+      "TvShows": {
+        "Client": "Disabled",
+        "Restrictions": "None"
+      },
+      "Port": 4545,
+      "BaseUrl": "/requestrr",
+      "DisableAuthentication": false,
+      "Version": "2.1.0"
+    }
+  init-requestrr.sh: |
+    #!/bin/bash
+    echo "### Initializing config"
+    if [ ! -f /requestrr-config/settings.json ]; then
+      cp -n /init-requestrr/settings.json /requestrr-config/settings.json
+      echo "### No configuration found, intialized with default settings ###"
+    fi
+kind: ConfigMap
+metadata:
+  name: init-requestrr-cm
+---
+### APPLICATION
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: requestrr-config
+data:
+  PGID: "{{ .Values.general.pgid }}"
+  PUID: "{{ .Values.general.puid }}"
+---
+### DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: requestrr
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "k8s-mediaserver.selectorLabels" . | nindent 6}}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-mediaserver.selectorLabels" . | nindent 8}}
+        app: requestrr
+    spec:
+      initContainers:
+        - name: config-requestrr
+          image: docker.io/ubuntu:groovy
+          command: ["/init-requestrr/init-requestrr.sh"]
+          volumeMounts:
+            - mountPath: /init-requestrr
+              name: init-files-requestrr
+          {{- if .Values.requestrr.volume }}
+            - name: {{ .Values.requestrr.volume.name }}
+              mountPath: /requestrr-config
+          {{- else }}
+            - name: mediaserver-volume
+              mountPath: /requestrr-config
+              subPath: "{{ .Values.general.storage.subPaths.config }}/requestrr"
+          {{- end }}
+          securityContext:
+            runAsUser: {{ .Values.general.puid }}
+            runAsGroup: {{ .Values.general.pgid }}
+      containers:
+        - name: {{ .Chart.Name }}
+          envFrom:
+            - configMapRef:
+                name: requestrr-config
+          image: "{{ .Values.requestrr.container.image }}:{{ .Values.requestrr.container.tag | default .Values.general.image_tag }}"
+          imagePullPolicy: Always
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.requestrr.container.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          ports:
+            - name: requestrr-port
+              containerPort: {{ .Values.requestrr.container.port }}
+              protocol: TCP
+          volumeMounts:
+          {{- if .Values.requestrr.volume }}
+            - name: {{ .Values.requestrr.volume.name }}
+              mountPath: /config
+          {{- else }}
+            - name: mediaserver-volume
+              mountPath: /config
+              subPath: "{{ .Values.general.storage.subPaths.config }}/requestrr"
+          {{- end }}
+          {{- if .Values.requestrr.extraVolumeMounts }}
+            {{- toYaml .Values.requestrr.extraVolumeMounts | nindent 12}}
+          {{- end }}
+          {{- with .Values.requestrr.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        {{ if not .Values.general.storage.customVolume }}
+        - name: mediaserver-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.general.storage.pvcName }}
+        {{ else }}
+        - name: mediaserver-volume
+          {{- toYaml .Values.general.storage.volumes | nindent 10 }}
+        {{ end }}
+        {{- if .Values.requestrr.volume }}
+        - name: {{ .Values.requestrr.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.requestrr.volume.name }}
+        {{- end }}
+        - name: init-files-requestrr
+          configMap:
+            defaultMode: 493
+            name: init-requestrr-cm
+        {{- if .Values.requestrr.extraVolumes }}
+          {{- toYaml .Values.requestrr.extraVolumes | nindent 8}}
+        {{- end }}
+      {{- with .Values.general.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8}}
+      {{- end }}
+---
+### SERVICES
+apiVersion: v1
+kind: Service
+metadata:
+  name: requestrr
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.requestrr.service.type }}
+  ports:
+    - port: {{ .Values.requestrr.service.port }}
+      targetPort: {{ .Values.requestrr.container.port }}
+      protocol: TCP
+{{ if eq .Values.requestrr.service.type "NodePort" }}
+      nodePort: {{ .Values.requestrr.service.nodePort }}
+{{ end }}
+      name: requestrr-port
+  selector:
+    app: requestrr
+---
+{{ if .Values.requestrr.service.extraLBService }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: requestrr-lb
+  annotations:
+    {{- include .Values.requestrr.service.extraLBService.annotations . | nindent 4 }}
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: {{ .Values.requestrr.service.port }}
+      targetPort: {{ .Values.requestrr.container.port }}
+      protocol: TCP
+      name: requestrr-port
+  selector:
+    app: requestrr
+{{ end }}
+---
+### INGRESS ###
+{{ if .Values.requestrr.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: requestrr
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+  {{- with .Values.requestrr.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{ if .Values.requestrr.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.general.ingress_host | quote }}
+      secretName: {{ .Values.requestrr.ingress.tls.secretName }}
+{{ end }}
+  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  rules:
+    - host: {{ .Values.general.ingress_host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.requestrr.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: requestrr
+                port:
+                  number: {{ .Values.requestrr.service.port }}
+{{ end }}
+{{ end }}
