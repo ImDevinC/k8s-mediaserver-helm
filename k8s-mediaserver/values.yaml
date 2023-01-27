@@ -51,15 +51,17 @@ sonarr:
       secretName: ""
   resources: {}
   volume: {}
-    #name: pvc-sonarr-config
-    #storageClassName: longhorn
-    #annotations:
-    #  my-annotation/test: my-value
-    #labels:
-    #  my-label/test: my-other-value
-    #accessModes: ReadWriteOnce
-    #storage: 5Gi
-    #selector: {}
+  extraVolumes: {}
+  extraVolumeMounts: {}
+  #name: pvc-sonarr-config
+  #storageClassName: longhorn
+  #annotations:
+  #  my-annotation/test: my-value
+  #labels:
+  #  my-label/test: my-other-value
+  #accessModes: ReadWriteOnce
+  #storage: 5Gi
+  #selector: {}
 
 radarr:
   enabled: true
@@ -82,6 +84,8 @@ radarr:
       secretName: ""
   resources: {}
   volume: {}
+  extraVolumes: {}
+  extraVolumeMounts: {}
     #name: pvc-radarr-config
     #storageClassName: longhorn
     #annotations: {}
@@ -111,6 +115,11 @@ jackett:
       secretName: ""
   resources: {}
   volume: {}
+  extraVolumes: {}
+  extraVolumeMounts:
+    - name: jackett-extra
+      hostPath:
+        path: /tmp/
   #  name: pvc-jackett-config
   #  storageClassName: longhorn
   #  annotations: {}
@@ -155,6 +164,8 @@ transmission:
       password: ""
   resources: {}
   volume: {}
+  extraVolumes: {}
+  extraVolumeMounts: {}
   #  name: pvc-transmission-config
   #  storageClassName: longhorn
   #  annotations: {}
@@ -193,6 +204,8 @@ sabnzbd:
       secretName: ""
   resources: {}
   volume: {}
+  extraVolumes: {}
+  extraVolumeMounts: {}
   #  name: pvc-plex-config
   #  storageClassName: longhorn
   #  annotations: {}
@@ -204,6 +217,7 @@ sabnzbd:
 plex:
   enabled: true
   claim: "CHANGEME"
+  hostNetwork: false # Will sometimes be needed for upnp forwarding
   replicaCount: 1
   container:
     image: docker.io/linuxserver/plex
@@ -236,3 +250,68 @@ plex:
   #  accessModes: ReadWriteOnce
   #  storage: 5Gi
   #  selector: {}
+  extraVolumes: {}
+  extraVolumeMounts: {}
+
+tautulli:
+  enabled: true
+  container:
+    image: docker.io/linuxserver/tautulli
+    nodeSelector: {}
+    port:
+      http: 8181
+  service:
+    type: ClusterIP
+    port: 8181
+    nodePort:
+    # Defines an additional LB service, requires cloud provider service or MetalLB
+    extraLBService: false
+  ingress:
+    enabled: true
+    annotations: {}
+    path: /tautulli
+    tls:
+      enabled: false
+      secretName: ""
+  resources: {}
+  volume: {}
+  #  name: pvc-plex-config
+  #  storageClassName: longhorn
+  #  annotations: {}
+  #  labels: {}
+  #  accessModes: ReadWriteOnce
+  #  storage: 5Gi
+  #  selector: {}
+  extraVolumes: {}
+  extraVolumeMounts: {}
+
+prowlarr:
+  enabled: true
+  container: 
+    image: docker.io/linuxserver/prowlarr
+    tag: develop
+    nodeSelector: {}
+    port: 9696
+  service:
+    type: ClusterIP
+    port: 9696
+    nodePort: 
+    extraLBService: false
+  ingress:
+    enabled: true
+    annotations: {}
+    path: /prowlarr
+    tls:
+      enabled: false
+      secretName: ""
+  resources: {}
+  volume: {}
+  #  name: pvc-prowlarr-config
+  #  storageClassName: longhorn
+  #  annotations: {}
+  #  labels: {}
+  #  accessModes: ReadWriteOnce
+  #  storage: 5Gi
+  #  selector: {}
+  extraVolumes: {}
+  extraVolumeMounts: {}
