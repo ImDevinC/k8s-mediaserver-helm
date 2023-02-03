@@ -31,7 +31,7 @@ general:
     ingressClassName: ""
 
 sonarr:
-  enabled: true
+  enabled: false
   container:
     image: docker.io/linuxserver/sonarr
     nodeSelector: {}
@@ -62,6 +62,11 @@ sonarr:
   #accessModes: ReadWriteOnce
   #storage: 5Gi
   #selector: {}
+  exportarr:
+    enabled: true
+    serviceMonitor: true
+    apiKey: xxxx
+    # apiSecret: xxx
 
 radarr:
   enabled: true
@@ -93,9 +98,15 @@ radarr:
     #accessModes: ReadWriteOnce
     #storage: 5Gi
     #selector: {}
+  exportarr:
+    enabled: true
+    serviceMonitor: true
+    apiKey: xxxx
+    # apiSecret: xxx
+
 
 jackett:
-  enabled: true
+  enabled: false
   container:
     image: docker.io/linuxserver/jackett
     nodeSelector: {}
@@ -129,7 +140,7 @@ jackett:
   #  selector: {}
 
 transmission:
-  enabled: true
+  enabled: false
   container:
     image: docker.io/linuxserver/transmission
     nodeSelector: {}
@@ -175,7 +186,7 @@ transmission:
   #  selector: {}
 
 sabnzbd:
-  enabled: true
+  enabled: false
   container:
     image: docker.io/linuxserver/sabnzbd
     nodeSelector: {}
@@ -215,7 +226,7 @@ sabnzbd:
   #  selector: {}
 
 plex:
-  enabled: true
+  enabled: false
   claim: "CHANGEME"
   hostNetwork: false # Will sometimes be needed for upnp forwarding
   replicaCount: 1
@@ -254,7 +265,7 @@ plex:
   extraVolumeMounts: {}
 
 tautulli:
-  enabled: true
+  enabled: false
   container:
     image: docker.io/linuxserver/tautulli
     nodeSelector: {}
@@ -285,7 +296,7 @@ tautulli:
   extraVolumeMounts: {}
 
 prowlarr:
-  enabled: true
+  enabled: false
   container: 
     image: docker.io/linuxserver/prowlarr
     tag: develop
@@ -314,9 +325,15 @@ prowlarr:
   #  selector: {}
   extraVolumes: {}
   extraVolumeMounts: {}
+  exportarr:
+    enabled: true
+    serviceMonitor: true
+    apiKey: xxxx
+    # apiSecret: xxx
+
 
 requestrr:
-  enabled: true
+  enabled: false
   container: 
     image: docker.io/linuxserver/requestrr
     nodeSelector: {}

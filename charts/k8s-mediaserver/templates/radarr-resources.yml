@@ -68,6 +68,43 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
+        {{- if .Values.radarr.exportarr.enabled }}
+        - name: metrics
+          image: "{{ .Values.radarr.exportarr.image | default "ghcr.io/onedr0p/exportarr" }}:{{ .Values.radarr.exportarr.imageTag | default "v1.0.0" }}"
+          imagePullPolicy: IfNotPresent
+          args:
+            - radarr
+          env:
+            - name: PORT
+              value: {{ .Values.radarr.exportarr.port | default 9090 | quote }}
+            - name: URL
+              value: {{ .Values.radarr.exportarr.url | default "http://localhost:9090"}}
+            - name: APIKEY
+              {{- if .Values.radarr.exportarr.apikey }}
+              value: .Values.radarr.exportarr.apikey
+              {{- end }}
+              {{- if .Values.radarr.exportarr.apiSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.radarr.exportarr.apiSecret }}
+                  key: api-key
+              {{- end }}
+          ports:
+            - name: monitoring
+              containerPort: {{ .Values.radarr.exportarr.port | default 9090 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+        {{- end }}
         - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
@@ -203,5 +240,23 @@ spec:
                 name: radarr
                 port:
                   number: {{ .Values.radarr.service.port }}
+{{ end }}
+---
+{{ if .Values.radarr.exportarr.serviceMonitor }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: radarr
+  labels:
+    app: radarr
+spec:
+  selector:
+    matchLabels:
+      app: radarr
+  endpoints:
+    - port: monitoring
+      interval: 4m
+      scrapeTimeout: 90s
+      path: /metrics
 {{ end }}
 {{ end }}

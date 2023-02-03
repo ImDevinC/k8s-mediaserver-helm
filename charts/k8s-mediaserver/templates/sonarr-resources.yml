@@ -67,6 +67,43 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
+        {{- if .Values.sonarr.exportarr.enabled }}
+        - name: metrics
+          image: "{{ .Values.sonarr.exportarr.image | default "ghcr.io/onedr0p/exportarr" }}:{{ .Values.sonarr.exportarr.imageTag | default "v1.0.0" }}"
+          imagePullPolicy: IfNotPresent
+          args:
+            - sonarr
+          env:
+            - name: PORT
+              value: {{ .Values.sonarr.exportarr.port | default 9090 | quote }}
+            - name: URL
+              value: {{ .Values.sonarr.exportarr.url | default "http://localhost:9090"}}
+            - name: APIKEY
+              {{- if .Values.sonarr.exportarr.apikey }}
+              value: .Values.sonarr.exportarr.apikey
+              {{- end }}
+              {{- if .Values.sonarr.exportarr.apiSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.sonarr.exportarr.apiSecret }}
+                  key: api-key
+              {{- end }}
+          ports:
+            - name: monitoring
+              containerPort: {{ .Values.sonarr.exportarr.port | default 9090 }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: monitoring
+            failureThreshold: 5
+            periodSeconds: 10
+        {{- end }}
         - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
@@ -201,5 +238,23 @@ spec:
                 name: sonarr
                 port:
                   number: {{ .Values.sonarr.service.port }}
+{{ end }}
+---
+{{ if .Values.sonarr.exportarr.serviceMonitor }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sonarr
+  labels:
+    app: sonarr
+spec:
+  selector:
+    matchLabels:
+      app: sonarr
+  endpoints:
+    - port: monitoring
+      interval: 4m
+      scrapeTimeout: 90s
+      path: /metrics
 {{ end }}
 {{ end }}
