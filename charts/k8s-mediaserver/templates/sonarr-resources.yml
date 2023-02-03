@@ -184,6 +184,12 @@ spec:
       nodePort: {{ .Values.sonarr.service.nodePort }}
 {{ end }}
       name: sonarr-port
+    {{- if .Values.sonarr.exportarr.enabled }}
+    - port: {{ .Values.sonarr.exportarr.port }}
+      targetPort: {{ .Values.sonarr.exportarr.port }}
+      protocol: TCP
+      name: monitoring
+    {{- end }}
   selector:
     app: sonarr
 ---
