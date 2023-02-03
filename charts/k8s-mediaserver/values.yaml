@@ -31,7 +31,7 @@ general:
     ingressClassName: ""
 
 sonarr:
-  enabled: false
+  enabled: true
   container:
     image: docker.io/linuxserver/sonarr
     nodeSelector: {}
@@ -106,7 +106,7 @@ radarr:
 
 
 jackett:
-  enabled: false
+  enabled: true
   container:
     image: docker.io/linuxserver/jackett
     nodeSelector: {}
@@ -140,7 +140,7 @@ jackett:
   #  selector: {}
 
 transmission:
-  enabled: false
+  enabled: true
   container:
     image: docker.io/linuxserver/transmission
     nodeSelector: {}
@@ -186,7 +186,7 @@ transmission:
   #  selector: {}
 
 sabnzbd:
-  enabled: false
+  enabled: true
   container:
     image: docker.io/linuxserver/sabnzbd
     nodeSelector: {}
@@ -226,7 +226,7 @@ sabnzbd:
   #  selector: {}
 
 plex:
-  enabled: false
+  enabled: true
   claim: "CHANGEME"
   hostNetwork: false # Will sometimes be needed for upnp forwarding
   replicaCount: 1
@@ -265,7 +265,7 @@ plex:
   extraVolumeMounts: {}
 
 tautulli:
-  enabled: false
+  enabled: true
   container:
     image: docker.io/linuxserver/tautulli
     nodeSelector: {}
@@ -296,7 +296,7 @@ tautulli:
   extraVolumeMounts: {}
 
 prowlarr:
-  enabled: false
+  enabled: true
   container: 
     image: docker.io/linuxserver/prowlarr
     tag: develop
@@ -333,7 +333,7 @@ prowlarr:
 
 
 requestrr:
-  enabled: false
+  enabled: true
   container: 
     image: docker.io/linuxserver/requestrr
     nodeSelector: {}
