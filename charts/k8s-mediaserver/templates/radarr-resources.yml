@@ -70,18 +70,18 @@ spec:
       containers:
         {{- if .Values.radarr.exportarr.enabled }}
         - name: metrics
-          image: "{{ .Values.radarr.exportarr.image | default "ghcr.io/onedr0p/exportarr" }}:{{ .Values.radarr.exportarr.imageTag | default "v1.0.0" }}"
+          image: "{{ .Values.radarr.exportarr.image }}:{{ .Values.radarr.exportarr.imageTag }}"
           imagePullPolicy: IfNotPresent
           args:
             - radarr
           env:
             - name: PORT
-              value: {{ .Values.radarr.exportarr.port | default 9090 | quote }}
+              value: {{ .Values.radarr.exportarr.port | quote }}
             - name: URL
-              value: {{ .Values.radarr.exportarr.url | default "http://localhost:9090"}}
+              value: "http://localhost:{{ .Values.radarr.container.port }}{{ .Values.radarr.exportarr.urlBase }}"
             - name: APIKEY
-              {{- if .Values.radarr.exportarr.apikey }}
-              value: .Values.radarr.exportarr.apikey
+              {{- if .Values.radarr.exportarr.apiKey }}
+              value: {{ .Values.radarr.exportarr.apiKey }}
               {{- end }}
               {{- if .Values.radarr.exportarr.apiSecret }}
               valueFrom:
@@ -91,7 +91,7 @@ spec:
               {{- end }}
           ports:
             - name: monitoring
-              containerPort: {{ .Values.radarr.exportarr.port | default 9090 }}
+              containerPort: {{ .Values.radarr.exportarr.port }}
           livenessProbe:
             httpGet:
               path: /healthz

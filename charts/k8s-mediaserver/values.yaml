@@ -63,10 +63,14 @@ sonarr:
   #storage: 5Gi
   #selector: {}
   exportarr:
+    image: ghcr.io/onedr0p/exportarr
+    imageTag: v1.0.0
     enabled: true
     serviceMonitor: true
     apiKey: xxxx
     # apiSecret: xxx
+    port: 9090
+    urlBase: /test
 
 radarr:
   enabled: true
@@ -99,10 +103,14 @@ radarr:
     #storage: 5Gi
     #selector: {}
   exportarr:
+    image: ghcr.io/onedr0p/exportarr
+    imageTag: v1.0.0
     enabled: true
     serviceMonitor: true
     apiKey: xxxx
     # apiSecret: xxx
+    port: 9090
+    urlBase: ""
 
 
 jackett:
@@ -325,11 +333,6 @@ prowlarr:
   #  selector: {}
   extraVolumes: {}
   extraVolumeMounts: {}
-  exportarr:
-    enabled: true
-    serviceMonitor: true
-    apiKey: xxxx
-    # apiSecret: xxx
 
 
 requestrr:

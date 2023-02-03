@@ -69,18 +69,18 @@ spec:
       containers:
         {{- if .Values.sonarr.exportarr.enabled }}
         - name: metrics
-          image: "{{ .Values.sonarr.exportarr.image | default "ghcr.io/onedr0p/exportarr" }}:{{ .Values.sonarr.exportarr.imageTag | default "v1.0.0" }}"
+          image: "{{ .Values.radarr.exportarr.image }}:{{ .Values.radarr.exportarr.imageTag }}"
           imagePullPolicy: IfNotPresent
           args:
             - sonarr
           env:
             - name: PORT
-              value: {{ .Values.sonarr.exportarr.port | default 9090 | quote }}
+              value: {{ .Values.sonarr.exportarr.port | quote }}
             - name: URL
-              value: {{ .Values.sonarr.exportarr.url | default "http://localhost:9090"}}
+              value: "http://localhost:{{ .Values.sonarr.container.port }}{{ .Values.sonarr.exportarr.urlBase }}"
             - name: APIKEY
-              {{- if .Values.sonarr.exportarr.apikey }}
-              value: .Values.sonarr.exportarr.apikey
+              {{- if .Values.sonarr.exportarr.apiKey }}
+              value: {{ .Values.sonarr.exportarr.apiKey }}
               {{- end }}
               {{- if .Values.sonarr.exportarr.apiSecret }}
               valueFrom:
