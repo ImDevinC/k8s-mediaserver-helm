@@ -67,7 +67,7 @@ sonarr:
     imageTag: v1.0.0
     enabled: true
     serviceMonitor: true
-    apiKey: xxxx
+    apiKey: ""
     # apiSecret: xxx
     port: 9090
     urlBase: /test
@@ -107,7 +107,7 @@ radarr:
     imageTag: v1.0.0
     enabled: true
     serviceMonitor: true
-    apiKey: xxxx
+    apiKey: ""
     # apiSecret: xxx
     port: 9090
     urlBase: ""
