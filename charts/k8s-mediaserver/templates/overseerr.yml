@@ -1,0 +1,343 @@
+{{ if .Values.overseerr.enabled }}
+---
+### CONFIGMAPS
+### INIT-CONTAINER
+apiVersion: v1
+data:
+  settings.json: |
+    {
+      "vapidPrivate": "",
+      "vapidPublic": "",
+      "main": {
+        "applicationTitle": "Overseerr",
+        "applicationUrl": "",
+        "csrfProtection": false,
+        "cacheImages": false,
+        "defaultPermissions": 32,
+        "defaultQuotas": {
+        "movie": {},
+        "tv": {}
+        },
+        "hideAvailable": false,
+        "localLogin": true,
+        "newPlexLogin": true,
+        "region": "",
+        "originalLanguage": "",
+        "trustProxy": false,
+        "partialRequestsEnabled": true,
+        "locale": "en"
+      },
+      "plex": {
+        "name": "",
+        "ip": "",
+        "port": 32400,
+        "useSsl": false,
+        "libraries": []
+      },
+      "tautulli": {},
+      "radarr": [],
+      "sonarr": [],
+      "public": {
+        "initialized": false
+      },
+      "notifications": {
+        "agents": {
+        "email": {
+          "enabled": false,
+          "options": {
+          "emailFrom": "",
+          "smtpHost": "",
+          "smtpPort": 587,
+          "secure": false,
+          "ignoreTls": false,
+          "requireTls": false,
+          "allowSelfSigned": false,
+          "senderName": "Overseerr"
+          }
+        },
+        "discord": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "webhookUrl": "",
+          "enableMentions": true
+          }
+        },
+        "lunasea": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "webhookUrl": ""
+          }
+        },
+        "slack": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "webhookUrl": ""
+          }
+        },
+        "telegram": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "botAPI": "",
+          "chatId": "",
+          "sendSilently": false
+          }
+        },
+        "pushbullet": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "accessToken": ""
+          }
+        },
+        "pushover": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "accessToken": "",
+          "userToken": ""
+          }
+        },
+        "webhook": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "webhookUrl": "",
+          "jsonPayload": "IntcbiAgICBcIm5vdGlmaWNhdGlvbl90eXBlXCI6IFwie3tub3RpZmljYXRpb25fdHlwZX19XCIsXG4gICAgXCJldmVudFwiOiBcInt7ZXZlbnR9fVwiLFxuICAgIFwic3ViamVjdFwiOiBcInt7c3ViamVjdH19XCIsXG4gICAgXCJtZXNzYWdlXCI6IFwie3ttZXNzYWdlfX1cIixcbiAgICBcImltYWdlXCI6IFwie3tpbWFnZX19XCIsXG4gICAgXCJ7e21lZGlhfX1cIjoge1xuICAgICAgICBcIm1lZGlhX3R5cGVcIjogXCJ7e21lZGlhX3R5cGV9fVwiLFxuICAgICAgICBcInRtZGJJZFwiOiBcInt7bWVkaWFfdG1kYmlkfX1cIixcbiAgICAgICAgXCJ0dmRiSWRcIjogXCJ7e21lZGlhX3R2ZGJpZH19XCIsXG4gICAgICAgIFwic3RhdHVzXCI6IFwie3ttZWRpYV9zdGF0dXN9fVwiLFxuICAgICAgICBcInN0YXR1czRrXCI6IFwie3ttZWRpYV9zdGF0dXM0a319XCJcbiAgICB9LFxuICAgIFwie3tyZXF1ZXN0fX1cIjoge1xuICAgICAgICBcInJlcXVlc3RfaWRcIjogXCJ7e3JlcXVlc3RfaWR9fVwiLFxuICAgICAgICBcInJlcXVlc3RlZEJ5X2VtYWlsXCI6IFwie3tyZXF1ZXN0ZWRCeV9lbWFpbH19XCIsXG4gICAgICAgIFwicmVxdWVzdGVkQnlfdXNlcm5hbWVcIjogXCJ7e3JlcXVlc3RlZEJ5X3VzZXJuYW1lfX1cIixcbiAgICAgICAgXCJyZXF1ZXN0ZWRCeV9hdmF0YXJcIjogXCJ7e3JlcXVlc3RlZEJ5X2F2YXRhcn19XCJcbiAgICB9LFxuICAgIFwie3tpc3N1ZX19XCI6IHtcbiAgICAgICAgXCJpc3N1ZV9pZFwiOiBcInt7aXNzdWVfaWR9fVwiLFxuICAgICAgICBcImlzc3VlX3R5cGVcIjogXCJ7e2lzc3VlX3R5cGV9fVwiLFxuICAgICAgICBcImlzc3VlX3N0YXR1c1wiOiBcInt7aXNzdWVfc3RhdHVzfX1cIixcbiAgICAgICAgXCJyZXBvcnRlZEJ5X2VtYWlsXCI6IFwie3tyZXBvcnRlZEJ5X2VtYWlsfX1cIixcbiAgICAgICAgXCJyZXBvcnRlZEJ5X3VzZXJuYW1lXCI6IFwie3tyZXBvcnRlZEJ5X3VzZXJuYW1lfX1cIixcbiAgICAgICAgXCJyZXBvcnRlZEJ5X2F2YXRhclwiOiBcInt7cmVwb3J0ZWRCeV9hdmF0YXJ9fVwiXG4gICAgfSxcbiAgICBcInt7Y29tbWVudH19XCI6IHtcbiAgICAgICAgXCJjb21tZW50X21lc3NhZ2VcIjogXCJ7e2NvbW1lbnRfbWVzc2FnZX19XCIsXG4gICAgICAgIFwiY29tbWVudGVkQnlfZW1haWxcIjogXCJ7e2NvbW1lbnRlZEJ5X2VtYWlsfX1cIixcbiAgICAgICAgXCJjb21tZW50ZWRCeV91c2VybmFtZVwiOiBcInt7Y29tbWVudGVkQnlfdXNlcm5hbWV9fVwiLFxuICAgICAgICBcImNvbW1lbnRlZEJ5X2F2YXRhclwiOiBcInt7Y29tbWVudGVkQnlfYXZhdGFyfX1cIlxuICAgIH0sXG4gICAgXCJ7e2V4dHJhfX1cIjogW11cbn0i"
+          }
+        },
+        "webpush": {
+          "enabled": false,
+          "options": {}
+        },
+        "gotify": {
+          "enabled": false,
+          "types": 0,
+          "options": {
+          "url": "",
+          "token": ""
+          }
+        }
+        }
+      },
+      "jobs": {
+        "plex-recently-added-scan": {
+        "schedule": "0 */5 * * * *"
+        },
+        "plex-full-scan": {
+        "schedule": "0 0 3 * * *"
+        },
+        "plex-watchlist-sync": {
+        "schedule": "0 */10 * * * *"
+        },
+        "radarr-scan": {
+        "schedule": "0 0 4 * * *"
+        },
+        "sonarr-scan": {
+        "schedule": "0 30 4 * * *"
+        },
+        "availability-sync": {
+        "schedule": "0 0 5 * * *"
+        },
+        "download-sync": {
+        "schedule": "0 * * * * *"
+        },
+        "download-sync-reset": {
+        "schedule": "0 0 1 * * *"
+        },
+        "image-cache-cleanup": {
+        "schedule": "0 0 5 * * *"
+        }
+      }
+      }
+  init-overseer.sh: |
+    #!/bin/bash
+    echo "### Initializing config"
+    if [ ! -f /overseerr-config/settings.json ]; then
+      cp -n /init-overseerr/settings.json /overseerr-config/settings.json
+      echo "### No configuration found, intialized with default settings ###"
+    fi
+kind: ConfigMap
+metadata:
+  name: init-overseerr-cm
+---
+### APPLICATION
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: overseerr-config
+data:
+  PGID: "{{ .Values.general.pgid }}"
+  PUID: "{{ .Values.general.puid }}"
+---
+### DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overseerr
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "k8s-mediaserver.selectorLabels" . | nindent 6}}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-mediaserver.selectorLabels" . | nindent 8}}
+        app: overseerr
+    spec:
+      initContainers:
+        - name: config-overseerr
+          image: docker.io/ubuntu:groovy
+          command: ["/init-overseerr/init-overseerr.sh"]
+          volumeMounts:
+            - mountPath: /init-overseerr
+              name: init-files-overseerr
+          {{- if .Values.overseerr.volume }}
+            - name: {{ .Values.overseerr.volume.name }}
+              mountPath: /overseerr-config
+          {{- else }}
+            - name: mediaserver-volume
+              mountPath: /overseerr-config
+              subPath: "{{ .Values.general.storage.subPaths.config }}/overseerr"
+          {{- end }}
+          securityContext:
+            runAsUser: {{ .Values.general.puid }}
+            runAsGroup: {{ .Values.general.pgid }}
+      containers:
+        - name: {{ .Chart.Name }}
+          envFrom:
+            - configMapRef:
+                name: overseerr-config
+          image: "{{ .Values.overseerr.container.image }}:{{ .Values.overseerr.container.tag | default .Values.general.image_tag }}"
+          imagePullPolicy: Always
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.overseerr.container.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          ports:
+            - name: overseerr-port
+              containerPort: {{ .Values.overseerr.container.port }}
+              protocol: TCP
+          volumeMounts:
+          {{- if .Values.overseerr.volume }}
+            - name: {{ .Values.overseerr.volume.name }}
+              mountPath: /config
+          {{- else }}
+            - name: mediaserver-volume
+              mountPath: /config
+              subPath: "{{ .Values.general.storage.subPaths.config }}/overseerr"
+          {{- end }}
+          {{- if .Values.overseerr.extraVolumeMounts }}
+            {{- toYaml .Values.overseerr.extraVolumeMounts | nindent 12}}
+          {{- end }}
+          {{- with .Values.overseerr.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        {{ if not .Values.general.storage.customVolume }}
+        - name: mediaserver-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.general.storage.pvcName }}
+        {{ else }}
+        - name: mediaserver-volume
+          {{- toYaml .Values.general.storage.volumes | nindent 10 }}
+        {{ end }}
+        {{- if .Values.overseerr.volume }}
+        - name: {{ .Values.overseerr.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.overseerr.volume.name }}
+        {{- end }}
+        - name: init-files-overseerr
+          configMap:
+            defaultMode: 493
+            name: init-overseerr-cm
+        {{- if .Values.overseerr.extraVolumes }}
+          {{- toYaml .Values.overseerr.extraVolumes | nindent 8}}
+        {{- end }}
+      {{- with .Values.general.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8}}
+      {{- end }}
+---
+### SERVICES
+apiVersion: v1
+kind: Service
+metadata:
+  name: overseerr
+  labels:
+    app: overseerr
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.overseerr.service.type }}
+  ports:
+    - port: {{ .Values.overseerr.service.port }}
+      targetPort: {{ .Values.overseerr.container.port }}
+      protocol: TCP
+{{ if eq .Values.overseerr.service.type "NodePort" }}
+      nodePort: {{ .Values.overseerr.service.nodePort }}
+{{ end }}
+      name: overseerr-port
+  selector:
+    app: overseerr
+---
+{{ if .Values.overseerr.service.extraLBService }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: overseerr-lb
+  annotations:
+    {{- include .Values.overseerr.service.extraLBService.annotations . | nindent 4 }}
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: {{ .Values.overseerr.service.port }}
+      targetPort: {{ .Values.overseerr.container.port }}
+      protocol: TCP
+      name: overseerr-port
+  selector:
+    app: overseerr
+{{ end }}
+---
+### INGRESS ###
+{{ if .Values.overseerr.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: overseerr
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+  {{- with .Values.overseerr.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{ if .Values.overseerr.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.general.ingress_host | quote }}
+      secretName: {{ .Values.overseerr.ingress.tls.secretName }}
+{{ end }}
+  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  rules:
+    - host: {{ .Values.general.ingress_host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.overseerr.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: overseerr
+                port:
+                  number: {{ .Values.overseerr.service.port }}
+{{ end }}
+{{ end }}
