@@ -188,7 +188,7 @@ spec:
               mountPath: /config
           {{- else }}
             - name: mediaserver-volume
-              mountPath: /config
+              mountPath: /root/config
               subPath: "{{ .Values.general.storage.subPaths.config }}/requestrr"
           {{- end }}
           {{- if .Values.requestrr.extraVolumeMounts }}

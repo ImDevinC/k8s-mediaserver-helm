@@ -269,7 +269,7 @@ prowlarr:
 requestrr:
   enabled: true
   container:
-    image: docker.io/linuxserver/requestrr
+    image: thomst08/requestrr
     nodeSelector: {}
     port: 4545
   service:
