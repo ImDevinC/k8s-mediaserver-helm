@@ -1,0 +1,175 @@
+{{ if .Values.mylarr.enabled }}
+---
+## APPLICATION
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mylarr-config
+data:
+  PGID: "{{ .Values.general.pgid }}"
+  PUID: "{{ .Values.general.puid }}"
+---
+### DEPLOYMENT
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mylarr
+  labels:
+    app: mylarr
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mylarr
+      {{- include "k8s-mediaserver.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "k8s-mediaserver.selectorLabels" . | nindent 8 }}
+        app: mylarr
+    spec:
+      initContainers:
+      containers:
+        - name: mylarr
+          envFrom:
+            - configMapRef:
+                name: mylarr-config
+          image: "{{ .Values.mylarr.container.image }}:{{ .Values.mylarr.container.tag | default .Values.general.image_tag }}"
+          imagePullPolicy: Always
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.mylarr.container.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          ports:
+            - name: http
+              containerPort: {{ .Values.mylarr.container.port }}
+              protocol: TCP
+          volumeMounts:
+          {{- if .Values.mylarr.volume }}
+            - name: {{ .Values.mylarr.volume.name }}
+              mountPath: /config
+          {{- else }}
+            - name: mediaserver-volume
+              mountPath: "/config"
+              subPath: "{{ .Values.general.storage.subPaths.config }}/mylarr"
+          {{- end }}
+            - name: mediaserver-volume
+              mountPath: "/downloads"
+              subPath: "{{ .Values.general.storage.subPaths.downloads }}"
+            - name: mediaserver-volume
+              mountPath: "/comics"
+              subPath: "{{ .Values.general.storage.subPaths.comics }}"
+          {{- if .Values.mylarr.extraVolumeMounts }}
+            {{- toYaml .Values.mylarr.extraVolumeMounts | nindent 12}}
+          {{- end }}
+          {{- with .Values.mylarr.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      volumes:
+        {{- if not .Values.general.storage.customVolume }}
+        - name: mediaserver-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.general.storage.pvcName }}
+        {{- else }}
+        - name: mediaserver-volume
+          {{- toYaml .Values.general.storage.volumes | nindent 10 }}
+        {{- end }}
+        {{- if .Values.mylarr.volume }}
+        - name: {{ .Values.mylarr.volume.name }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.mylarr.volume.name }}
+        {{- end }}
+        {{- if .Values.mylarr.extraVolumes }}
+          {{- toYaml .Values.mylarr.extraVolumes | nindent 8}}
+        {{- end }}
+      {{- with .Values.general.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+### SERVICES
+apiVersion: v1
+kind: Service
+metadata:
+  name: mylarr
+  labels:
+    app: mylarr
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.mylarr.service.type }}
+  ports:
+    - port: {{ .Values.mylarr.service.port }}
+      targetPort: {{ .Values.mylarr.container.port }}
+      protocol: TCP
+{{ if eq .Values.mylarr.service.type "NodePort" }}
+      nodePort: {{ .Values.mylarr.service.nodePort }}
+{{ end }}
+      name: http
+    {{- if .Values.mylarr.exportarr.enabled }}
+    - port: {{ .Values.mylarr.exportarr.port }}
+      targetPort: {{ .Values.mylarr.exportarr.port }}
+      protocol: TCP
+      name: monitoring
+    {{- end }}
+  selector:
+    app: mylarr
+---
+{{ if .Values.mylarr.service.extraLBService }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mylarr-lb
+  annotations:
+    {{- include .Values.mylarr.service.extraLBService.annotations . | nindent 4 }}
+  labels:
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: {{ .Values.mylarr.service.port }}
+      targetPort: {{ .Values.mylarr.container.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: mylarr
+{{ end }}
+---
+### INGRESS
+{{ if .Values.mylarr.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mylarr
+  labels:
+    app: mylarr
+    {{- include "k8s-mediaserver.labels" . | nindent 4 }}
+  {{- with .Values.mylarr.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{- if .Values.mylarr.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.general.ingress_host | quote }}
+      secretName: {{ .Values.mylarr.ingress.tls.secretName }}
+{{ end }}
+  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  rules:
+    - host: {{ .Values.general.ingress_host | quote }}
+      http:
+        paths:
+          - path: {{ .Values.mylarr.ingress.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: mylarr
+                port:
+                  number: {{ .Values.mylarr.service.port }}
+{{ end }}
+{{ end }}
