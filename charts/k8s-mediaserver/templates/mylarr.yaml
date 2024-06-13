@@ -110,12 +110,6 @@ spec:
       nodePort: {{ .Values.mylarr.service.nodePort }}
 {{ end }}
       name: http
-    {{- if .Values.mylarr.exportarr.enabled }}
-    - port: {{ .Values.mylarr.exportarr.port }}
-      targetPort: {{ .Values.mylarr.exportarr.port }}
-      protocol: TCP
-      name: monitoring
-    {{- end }}
   selector:
     app: mylarr
 ---

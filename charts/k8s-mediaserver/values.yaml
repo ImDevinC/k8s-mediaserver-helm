@@ -315,7 +315,7 @@ overseerr:
 mylarr:
   enabled: true
   container:
-    image: lscr.io/linuxserver/mylar3:latest
+    image: lscr.io/linuxserver/mylar3
     nodeSelector: {}
     port: 8090
   service:
