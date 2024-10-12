@@ -65,7 +65,7 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: jackett
           envFrom:
             - configMapRef:
                 name: jackett-config
@@ -180,12 +180,12 @@ spec:
 {{ if .Values.jackett.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.jackett.ingress.host | quote }}
       secretName: {{ .Values.jackett.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.jackett.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.jackett.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.jackett.ingress.path }}

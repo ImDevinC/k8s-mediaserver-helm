@@ -183,7 +183,7 @@ data:
     nomedia_marker = ""
     ipv6_servers = 1
     url_base = /sabnzbd
-    host_whitelist = {{ .Values.general.ingress_host }}
+    host_whitelist = {{ .Values.sabnzbd.ingress.host }}
     local_ranges = ,
     max_url_retries = 10
     downloader_sleep_time = 10
@@ -368,7 +368,7 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: sabnzbd
           envFrom:
             - configMapRef:
                 name: sabnzbd-config
@@ -524,12 +524,12 @@ spec:
 {{- if .Values.sabnzbd.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.sabnzbd.ingress.host | quote }}
       secretName: {{ .Values.sabnzbd.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.sabnzbd.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.sabnzbd.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.sabnzbd.ingress.path }}

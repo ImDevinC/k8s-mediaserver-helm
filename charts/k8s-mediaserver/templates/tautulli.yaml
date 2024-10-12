@@ -65,7 +65,7 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: tautulli
           envFrom:
             - configMapRef:
                 name: tautulli-config
@@ -178,12 +178,12 @@ spec:
 {{ if .Values.tautulli.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.tautulli.ingress.host | quote }}
       secretName: {{ .Values.tautulli.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.tautulli.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.tautulli.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.tautulli.ingress.path }}

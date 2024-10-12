@@ -105,7 +105,7 @@ spec:
             failureThreshold: 5
             periodSeconds: 10
         {{- end }}
-        - name: {{ .Chart.Name }}
+        - name: radarr
           envFrom:
             - configMapRef:
                 name: radarr-config
@@ -232,12 +232,12 @@ spec:
 {{- if .Values.radarr.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.radarr.ingress.host | quote }}
       secretName: {{ .Values.radarr.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.radarr.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.radarr.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.radarr.ingress.path }}

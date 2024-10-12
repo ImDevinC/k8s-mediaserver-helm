@@ -104,7 +104,7 @@ spec:
             failureThreshold: 5
             periodSeconds: 10
         {{- end }}
-        - name: {{ .Chart.Name }}
+        - name: sonarr
           envFrom:
             - configMapRef:
                 name: sonarr-config
@@ -230,12 +230,12 @@ spec:
 {{- if .Values.sonarr.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.sonarr.ingress.host | quote }}
       secretName: {{ .Values.sonarr.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.sonarr.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.sonarr.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.sonarr.ingress.path }}

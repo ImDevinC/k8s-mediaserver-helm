@@ -65,7 +65,7 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: prowlarr
           envFrom:
             - configMapRef:
                 name: prowlarr-config
@@ -179,12 +179,12 @@ spec:
 {{ if .Values.prowlarr.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.prowlarr.ingress.host | quote }}
       secretName: {{ .Values.prowlarr.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.prowlarr.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.prowlarr.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.prowlarr.ingress.path }}

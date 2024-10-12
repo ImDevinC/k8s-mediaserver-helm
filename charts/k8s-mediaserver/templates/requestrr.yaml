@@ -167,7 +167,7 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: requestrr
           envFrom:
             - configMapRef:
                 name: requestrr-config
@@ -280,12 +280,12 @@ spec:
 {{ if .Values.requestrr.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.requestrr.ingress.host | quote }}
       secretName: {{ .Values.requestrr.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.requestrr.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.requestrr.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.requestrr.ingress.path }}

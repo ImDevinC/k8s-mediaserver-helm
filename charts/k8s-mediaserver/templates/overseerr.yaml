@@ -210,7 +210,7 @@ spec:
             runAsUser: {{ .Values.general.puid }}
             runAsGroup: {{ .Values.general.pgid }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: overseerr
           envFrom:
             - configMapRef:
                 name: overseerr-config
@@ -324,12 +324,12 @@ spec:
 {{ if .Values.overseerr.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.general.ingress_host | quote }}
+        - {{ .Values.overseerr.ingress.host | quote }}
       secretName: {{ .Values.overseerr.ingress.tls.secretName }}
 {{ end }}
-  ingressClassName: {{ .Values.general.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.overseerr.ingress.ingressClassName }}
   rules:
-    - host: {{ .Values.general.ingress_host | quote }}
+    - host: {{ .Values.overseerr.ingress.host | quote }}
       http:
         paths:
           - path: {{ .Values.overseerr.ingress.path }}
