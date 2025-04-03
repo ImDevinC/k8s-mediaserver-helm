@@ -1,0 +1,30 @@
+{
+  "username": "renovate",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "onboarding": false,
+  "platform": "github",
+  "labels": [
+    "renovate"
+  ],
+  "assignees": [
+    "ImDevinC"
+  ],
+  "repositories": [
+    "ImDevinC/homelab"
+  ],
+  "packageRules": [
+    {
+      "description": "lockFileMaintenance",
+      "matchUpdateTypes": [
+        "pin",
+        "digest",
+        "patch",
+        "minor",
+        "major",
+        "lockFileMaintenance"
+      ],
+      "dependencyDashboardApproval": false,
+      "minimumReleaseAge": "0"
+    }
+  ]
+}
